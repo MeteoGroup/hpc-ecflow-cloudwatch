@@ -1,25 +1,43 @@
-from flask import Flask
-#from werkzeug.wsgi import DispatcherMiddleware
-#from prometheus_client import make_wsgi_app
+from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+
+from ecflow_metrics import EcflowMetrics
 
 
-# Create my app
-app = Flask(__name__)
+class S(BaseHTTPRequestHandler):
+    def _set_headers(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+
+    def do_GET(self):
+        self._set_headers()
+        if self.path == '/metrics':
+            ecflow_metrics = EcflowMetrics()
+            prometheus_metrics = ecflow_metrics.get_ecflow_metrics()
+            self.wfile.write(prometheus_metrics)
+        else:
+            self.wfile.write("<html><body><h1>welcome to the headnode!</h1></body></html>")
+
+    def do_HEAD(self):
+        self._set_headers()
+
+    def do_POST(self):
+        # Doesn't do anything with posted data
+        self._set_headers()
+        self.wfile.write("<html><body><h1>POST!</h1></body></html>")
 
 
-@app.route("/")
-def hello():
-    return "hello world"
+def run(server_class=HTTPServer, handler_class=S, port=8000):
+    server_address = ('10.31.41.24', port)
+    httpd = server_class(server_address, handler_class)
+    print 'Starting httpd...'
+    httpd.serve_forever()
 
 
-@app.route("/metrics")
-def metrics():
-    return "my_first_metric 3.14"
+if __name__ == "__main__":
+    from sys import argv
 
-
-# if __name__ == '__main__':
-#  app.run(host='0.0.0.0', port=8000)
-
-# Add prometheus wsgi middleware to route /metrics requests
-#app_dispatch = DispatcherMiddleware(app, {'/metrics': make_wsgi_app()})
-
+    if len(argv) == 2:
+        run(port=int(argv[1]))
+    else:
+        run()
