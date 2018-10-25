@@ -6,7 +6,7 @@ from metric_converter import MetricsConverters
 
 class EcflowMetrics(object):
 
-    def get_ecflow_metrics():
+    def get_ecflow_metrics(self):
         dao = EcflowDAO()
         output = dao.fetch_ecflow_stats()
         parser = EcflowStateParser()
@@ -17,4 +17,8 @@ class EcflowMetrics(object):
         converter = MetricsConverters()
         prometheus_dict = converter.convert_to_prometheus_format(aggregated_metrics)
 
-        return prometheus_dict
+        output_str = ""
+        for key, value in prometheus_dict.iteritems():
+            output_str = output_str+"\n"+key+" "+str(value)
+
+        return output_str
