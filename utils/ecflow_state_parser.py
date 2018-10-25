@@ -20,7 +20,9 @@ class EcflowStateParser(object):
                     if last_part == "task":
                         # task has no end task tag
                         self.metric_prefix = self.metric_prefix.replace("_"+last_prefix, "")
-                    last_prefix = parts[1]
+
+                    self.metric_prefix = self.metric_prefix + "_task"
+                    last_prefix = parts[1] + "_task"
 
                 if parts[0] == "family":
                     if last_part == "task":
@@ -53,9 +55,7 @@ class EcflowStateParser(object):
             if parts[0] == "endsuite":
                 self.metric_prefix = self.metric_prefix.replace("_"+last_suite_prefix, "")
 
-        print self.metrics
-
-
+        return self.metrics
 
     def preprocess_line(self,line):
         # remove leading and trailing spaces
