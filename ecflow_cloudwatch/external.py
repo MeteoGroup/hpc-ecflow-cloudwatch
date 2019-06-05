@@ -7,5 +7,4 @@ def run_subprocess(cmd, shell=True):
     except CalledProcessError as e:
         print('{} failed:'.format(cmd))
         print(e)
-        print(e.message)
         raise
