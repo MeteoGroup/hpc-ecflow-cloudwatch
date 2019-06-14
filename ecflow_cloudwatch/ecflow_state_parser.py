@@ -1,68 +1,109 @@
+import re
+import sys
+import json
+import ecflow
+import logging 
+from datetime import datetime
+
+
 class EcflowStateParser(object):
 
-    metric_prefix = "ecflow"
-    metrics = {}
 
-    def parse_ecflow_state(self,rawinput):
-        last_prefix = ""
-        family_prefix = []
-        last_suite_prefix = ""
-        last_part = ""
-        lines = rawinput.splitlines()
-        for line in lines:
+    # config for strcutre data 
+    # if key has - sign, it will exclude from parsing 
+    # By default, it will also add path of task 
+    services = {
+        "mgforecast" : {
+            "controller": ["suite", "service", "task", "state"],
+            "monitor": ["suite", "cycle_time-", "service", "datasource", "progress"],
+            "datafetcher": ["suite", "cycle_time", "service", "datasource_task", "status"],
+            "dataconversion": ["suite", "cycle_time", "service", "datasource", "task", "status"],
+            "mgmodels": ["suite", "cycle_time", "service" ,"model", "area", "task", "status"],
+            "default": ["suite", "cycle_time", "service", "state"]
+        },
+        "crontab": {
+             "default": ["suite", "service", "task", "state"]
+        }
+    }
 
-            parts = self.preprocess_line(line)
+    metrics = []
 
-            if parts[0] == "suite" or parts[0] == "family" or parts[0] == 'task':
-                self.metric_prefix = self.metric_prefix + "_" + parts[1]
+    def __init__(self, defs):
+        assert (isinstance(defs, ecflow.Defs)),"Expected ecflow.Defs as first argument"
+        self.__defs = defs
 
-                if parts[0] == "task":
-                    if last_part == "task":
-                        # task has no end task tag
-                        self.metric_prefix = self.metric_prefix.replace("_"+last_prefix, "")
+    def is_task(self, node):
+        if isinstance(node, ecflow.Task):
+            return True
+        return False
 
-                    self.metric_prefix = self.metric_prefix + "_task"
-                    last_prefix = parts[1] + "_task"
+    def is_meter(self, node):
+        for meter in node.meters:
+            if meter.value():
+                return True
+        return False
 
-                if parts[0] == "family":
-                    if last_part == "task":
-                        # task can be followed by a family
-                        self.metric_prefix = self.metric_prefix.replace("_"+last_prefix, "")
-                    family_prefix.append(parts[1])
+    def select_service(self, task_path):
+        suite = task_path[0]
+        if suite in self.services.keys():
+            for task in task_path:
+                    if task in self.services[suite].keys():
+                        return self.services[suite][task]
+            return self.services[suite]['default']
+        else:
+            return None
 
-                if parts[0] == "suite":
-                    last_suite_prefix = parts[1]
 
-                n = 0
-                for part in parts:
-                    if part == "state":
-                        break
-                    n = n + 1
+    def combine(self, data_format, data_set):
+        # if len(x) == len(y):
+        #     return dict(zip(x,y))
+        output = []
+        state_key = data_format[-1]
+        state = data_set[-1]
+        data_format_copy = data_format[:-1]
+        data_set_copy = data_set[:-1]
+        for i in range(len(data_format_copy)):
+            # exclude key which has - char 
+            #print data_format[i]
+            if '-' in data_format_copy[i]:
+                continue
+            if data_format_copy[i] == data_format_copy[-1]:
+                 data_set_copy[i] = "_".join(data_set_copy[i:])
+            output.append((data_format_copy[i],data_set_copy[i]))
+        output.append((state_key, state))
+        output.append(('task_path', '/'.join(data_set_copy)))
+        return dict(output)
+    
+    def parse(self):
+        for suite in self.__defs.suites:
+                for service in suite.nodes:
+                    for task in service.get_all_nodes():
+                        if self.is_task(task) or self.is_meter(task):
+                            available_data = filter(None, task.get_abs_node_path().split("/"))
+                            selected_data = self.select_service(available_data)
 
-                self.metrics[self.metric_prefix] = parts[n+1]
+                            if selected_data is None:
+                                print "Missing configs for {} {}".format(suite.name(), task.get_abs_node_path())
+                                continue
 
-                last_part = parts[0]
+                            if self.is_meter(task):
+                                for meter in task.meters:
+                                    min, max, threshold = meter.min(), meter.max(), meter.value()
+                                available_data.append(','.join(map(lambda x: str(x), [min, max, threshold])))
+                            else:
+                                available_data.append(str(task.get_state()))
 
-            if parts[0] == "endfamily":
-                if last_part == "task":
-                    self.metric_prefix = self.metric_prefix.replace("_"+family_prefix[-1]+"_"+last_prefix, "")
-                elif last_part == "endfamily" or last_part == "family":
-                    self.metric_prefix = self.metric_prefix.replace("_" + family_prefix[-1], "")
 
-                del family_prefix[-1]
-                last_part = parts[0]
-
-            if parts[0] == "endsuite":
-                self.metric_prefix = self.metric_prefix.replace("_"+last_suite_prefix, "")
+                            try:
+                                metric = self.combine(selected_data, available_data)
+                                self.metrics.append(metric)
+                            except:
+                                if selected_data and available_data:
+                                    metric = self.combine(selected_data, available_data)
+                                    self.metrics.append(metric)
+                                else:
+                                    print "Unable to parse data:"
+                                    print task.get_abs_node_path()
+                                    raise
 
         return self.metrics
-
-    def preprocess_line(self,line):
-        # remove leading and trailing spaces
-        line = line.strip()
-
-        # replace colon by space
-        line = line.replace(":"," ")
-        # split line by space
-        parts = line.split(" ")
-        return parts
