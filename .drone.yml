@@ -1,0 +1,26 @@
+---
+workspace:
+    base: /drone
+    path: src
+
+# Fix(Drone issue) : https://discourse.drone.io/t/planned-change-to-git-clone-logic/1165/15
+clone:
+  git:
+    image: plugins/git:next
+    pull: true
+
+pipeline:
+  build:
+    image: docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    commands:
+      - docker build -t ecflow_env .
+
+  test:
+    image: ecflow_env
+    commands:
+      - source /usr/local/bin/docker-entrypoint.sh
+      - cd /src/test
+      - PYTHONPATH=$PYTHONPATH:/src/
+      - python -m unittest discover -s $PWD -t $PWD
