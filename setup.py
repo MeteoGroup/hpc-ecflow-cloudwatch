@@ -9,6 +9,8 @@ setup(name='ecflow_cloudwatch',
               'ecflow_cloudwatch = ecflow_cloudwatch.__main__:main'
               ]
       },
-      install_requires=['boto3>=1.7.79'],
+      install_requires=[
+          'boto3>=1.7.79',
+          'jsonschema>=3.0.1'],
       zip_safe=False
       )
