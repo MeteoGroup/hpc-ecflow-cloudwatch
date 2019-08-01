@@ -1,0 +1,27 @@
+{
+    "title": "Count",
+    "type": "object",
+    "properties": {
+      "queued_tasks": {
+        "type": "number",
+        "minimum": 0
+      },
+      "running_tasks": {
+        "type": "number",
+        "minimum": 0
+      },
+      "suspended_tasks": {
+        "type": "number",
+        "minimum": 0
+      },
+      "aborted_tasks": {
+        "type": "number",
+        "minimum": 0
+      },
+      "completed_tasks": {
+        "type": "number",
+        "minimum": 0
+      }
+    },
+    "required": ["queued_tasks", "running_tasks", "suspended_tasks", "aborted_tasks"]
+}
