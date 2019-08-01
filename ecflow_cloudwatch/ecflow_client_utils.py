@@ -1,6 +1,5 @@
 import os
 import ecflow
-from .external import run_subprocess
 
 
 class GetEcflowStats(object):
