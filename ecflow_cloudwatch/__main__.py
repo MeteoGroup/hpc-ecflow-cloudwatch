@@ -1,4 +1,5 @@
 import os
+from distutils.util import strtobool
 import ecflow 
 from common import parse_args
 from common import put_metric_data
@@ -22,7 +23,7 @@ def main():
     namespace = args.namespace
     ecf_host = args.ecflow_host
     ecf_port = args.ecflow_port
-    fetch_new = args.fetch_new
+    fetch_new = bool(strtobool(args.fetch_new))
     
     
     metrics = get_ecflow_metrics(fetch_new)
