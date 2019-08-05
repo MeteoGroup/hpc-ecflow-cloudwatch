@@ -1506,7 +1506,7 @@ suite mgforecast #  begun:1 state:queued dur:49:35:18
                     edit VALID_DATETIME '201906060000'
                     # edit FAMILY '201906051200/dataconversion/ncep/gfs/global/0p25/netcdf/run/201906060000'
                     # edit FAMILY1 '201906060000'
-                    task grib2netcdf # state:queued
+                    task grib2netcdf # state:aborted
                       # edit TASK 'grib2netcdf'
                       # edit ECF_JOB '/shared/apps/ecflow/run/3143/mgforecast/201906051200/dataconversion/ncep/gfs/global/0p25/netcdf/run/201906060000/grib2netcdf.job0'
                       # edit ECF_SCRIPT '/shared/apps/ecflow/run/3143/mgforecast/201906051200/dataconversion/ncep/gfs/global/0p25/netcdf/run/201906060000/grib2netcdf.ecf'
