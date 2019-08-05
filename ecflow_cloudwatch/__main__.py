@@ -20,9 +20,8 @@ def get_ecflow_metrics(fetch_new=False):
 def main():
     args = parse_args()
     namespace = args.namespace
-
-    ecf_host = args.ecf_host
-    ecf_port = args.ecf_port
+    ecf_host = args.ecflow_host
+    ecf_port = args.ecflow_port
     fetch_new = args.fetch_new
     
     
