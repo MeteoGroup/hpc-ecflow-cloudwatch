@@ -7,22 +7,26 @@ from ecflow_client_utils import GetEcflowStats
 from ecflow_state_parser import EcflowStateParser
 from metric_aggregator import MetricAgregator
 
-def get_ecflow_metrics():
+def get_ecflow_metrics(fetch_new=False):
     # Get data 
     ecf_client = GetEcflowStats()
     ecf_defs = ecf_client.fetch_ecflow_stats()
 
     # parse to json
-    parser = EcflowStateParser(ecf_defs)
+    parser = EcflowStateParser(ecf_defs, fetch_new=fetch_new)
     return parser.parse()
 
 
 def main():
     args = parse_args()
     namespace = args.namespace
+
+    ecf_host = args.ecf_host
+    ecf_port = args.ecf_port
+    fetch_new = args.fetch_new
     
     
-    metrics = get_ecflow_metrics()
+    metrics = get_ecflow_metrics(fetch_new)
     aggregator = MetricAgregator(metrics)
     counts = aggregator.get_metrics_counts()
     meters = aggregator.get_metrics_meters()

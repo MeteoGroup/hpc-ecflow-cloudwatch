@@ -95,7 +95,7 @@ class MetricAgregator(object):
             for key, value in svc.items():
                 if "status" in key:
                     if value == "aborted":
-                        metrics_data  = {svc['task_path']:1}
+                        metrics_data  = {svc['task']:1}
                         dimensions = self.prepared_dimensions(svc)
                         cloud_watch_metrics.append(self.prepare_cloudwatch_metrics(
                             data=metrics_data,

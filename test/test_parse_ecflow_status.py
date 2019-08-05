@@ -28,11 +28,12 @@ class TestParseEcflowStats(unittest.TestCase):
         self.assertTrue(len(counts)>0)
 
     def testEcflowParser(self):
-        #print(json.dumps(self.metrics, indent=4))
+        print(json.dumps(self.metrics, indent=4))
         self.assertTrue(len(self.metrics)>0)
 
     def testAggregatorCount(self):
         counts = self.aggregator.get_counts()
+        print json.dumps(counts, indent=4)
         with open("{}/data/counts.json".format(os.getcwd())) as cjs:
             schema_data = cjs.read()
         schema = json.loads(schema_data)
