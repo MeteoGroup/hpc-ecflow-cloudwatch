@@ -13,7 +13,7 @@ def parse_args():
     parser.add_argument('--ecflow_host', help='ecflow server host ip or hostname', \
                            default="localhost")
     parser.add_argument('--fetch_new', help='Filter only current and future cycle data from ecflow defs', \
-                           default="False")
+                           default='False', choices=('True','False'))
     args = parser.parse_args()
     return args
 
