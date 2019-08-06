@@ -81,10 +81,12 @@ class MetricAgregator(object):
                 # change -1 to 0, cloudwatch does not support negative int
                 if value < 0:
                     value = 0
+                metrics_data = {svc['datasource']: self.percentage(value, maximum)}
                 # with different progress value cloudwatch create new metrics instead of updating exsting
                 # to fix this remove progress from metrics 
                 del svc['progress']
-                metrics_data = {svc['datasource']: self.percentage(value, maximum)}
+                # remove datasource key because, already sending as metrics name
+                del svc['datasource']
                 dimensions = self.prepared_dimensions(svc)
                 cloud_watch_metrics.append(self.prepare_cloudwatch_metrics(
                     data=metrics_data,
