@@ -35,6 +35,8 @@ class EcflowStateParser(object):
         self.__defs = defs
         # fetch new data only
         self.fetch_new = fetch_new
+        # capture only last 6 hour forecast metrics if fetch_new is true
+        self.forecast_window = 6 
 
     # Cloudwatch needed uniq metrics and due to forecast hour with date in each task
     # it can't be uniq, so extracting only forecast hour from date
@@ -53,7 +55,7 @@ class EcflowStateParser(object):
         if match:
             this_date = datetime.strptime(match.group(), self.cycletime_date_format)
             hours_diff = (present - this_date).total_seconds() / 3600
-            if hours_diff < 4 and hours_diff >= 0:
+            if hours_diff < self.forecast_window and hours_diff >= 0:
                 #print "{} >= {}".format(this_date, present)
                 return True
         else:
