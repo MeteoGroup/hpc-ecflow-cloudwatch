@@ -30,7 +30,7 @@ class EcflowStateParser(object):
 
     metrics = []
 
-    def __init__(self, defs, fetch_new=False):
+    def __init__(self, defs, fetch_new):
         assert (isinstance(defs, ecflow.Defs)),"Expected ecflow.Defs as first argument"
         self.__defs = defs
         # fetch new data only
@@ -46,11 +46,19 @@ class EcflowStateParser(object):
 
     # parse data only with current and future date
     def filter_date(self, node):
-        present = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        match = re.search(self.cycletime_format, node)
-        if match:
-            this_date = datetime.strptime(match.group(), self.cycletime_date_format)
-            if this_date >= present:
+        if self.fetch_new:
+            present = datetime.strptime(
+                datetime.now().replace(minute=0, second=0, microsecond=0).strftime(self.cycletime_date_format),
+                self.cycletime_date_format)
+            match = re.search(self.cycletime_format, node)
+            if match:
+                this_date = datetime.strptime(match.group(), self.cycletime_date_format)
+                hours_diff = (present - this_date).total_seconds() / 3600
+                if hours_diff < 4 and hours_diff >= 0:
+                    #print "{} >= {}".format(this_date, present)
+                    return True
+            else:
+                # if node does not have cycledate this return as it is
                 return True
         return False
         
@@ -108,7 +116,8 @@ class EcflowStateParser(object):
                 for service in suite.nodes:
                     for task in service.get_all_nodes():
                         if self.is_task(task) or self.is_meter(task):
-                            if not self.fetch_new or self.filter_date(task.get_abs_node_path()):
+                            if self.filter_date(task.get_abs_node_path()):
+                                #print("Parsing {}".format(task.get_abs_node_path()))
                                 available_data = filter(None, task.get_abs_node_path().split("/"))
                                 selected_data = self.select_service(available_data)
 

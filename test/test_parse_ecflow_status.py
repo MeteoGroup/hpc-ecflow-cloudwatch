@@ -14,7 +14,7 @@ import ecflow
 class TestParseEcflowStats(unittest.TestCase):
 
     def setUp(self):
-        parser = EcflowStateParser(self.get_test_data())
+        parser = EcflowStateParser(self.get_test_data(), fetch_new=True)
         self.metrics = parser.parse()
         self.aggregator = MetricAgregator(self.metrics)
         #print json.dumps(self.metrics, indent=4)

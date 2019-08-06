@@ -8,7 +8,7 @@ from ecflow_client_utils import GetEcflowStats
 from ecflow_state_parser import EcflowStateParser
 from metric_aggregator import MetricAgregator
 
-def get_ecflow_metrics(fetch_new=False):
+def get_ecflow_metrics(fetch_new):
     # Get data 
     ecf_client = GetEcflowStats()
     ecf_defs = ecf_client.fetch_ecflow_stats()
@@ -24,6 +24,7 @@ def main():
     ecf_host = args.ecflow_host
     ecf_port = args.ecflow_port
     fetch_new = bool(strtobool(args.fetch_new))
+
     
     
     metrics = get_ecflow_metrics(fetch_new)
