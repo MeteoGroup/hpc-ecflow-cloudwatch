@@ -30,7 +30,7 @@ class EcflowStateParser(object):
 
     metrics = []
 
-    def __init__(self, defs, fetch_new=False):
+    def __init__(self, defs, fetch_new):
         assert (isinstance(defs, ecflow.Defs)),"Expected ecflow.Defs as first argument"
         self.__defs = defs
         # fetch new data only
@@ -46,13 +46,20 @@ class EcflowStateParser(object):
 
     # parse data only with current and future date
     def filter_date(self, node):
-        present = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        present = datetime.strptime(
+            datetime.now().replace(minute=0, second=0, microsecond=0).strftime(self.cycletime_date_format),
+            self.cycletime_date_format)
         match = re.search(self.cycletime_format, node)
         if match:
             this_date = datetime.strptime(match.group(), self.cycletime_date_format)
-            if this_date >= present:
+            hours_diff = (present - this_date).total_seconds() / 3600
+            if hours_diff < 4 and hours_diff >= 0:
+                #print "{} >= {}".format(this_date, present)
                 return True
-        return False
+        else:
+            # if node does not have cycledate this return as it is
+            return True
+
         
         
     def is_task(self, node):
@@ -108,32 +115,35 @@ class EcflowStateParser(object):
                 for service in suite.nodes:
                     for task in service.get_all_nodes():
                         if self.is_task(task) or self.is_meter(task):
-                            if not self.fetch_new or self.filter_date(task.get_abs_node_path()):
-                                available_data = filter(None, task.get_abs_node_path().split("/"))
-                                selected_data = self.select_service(available_data)
+                            # if not recent date then continue
+                            if self.fetch_new and not self.filter_date(task.get_abs_node_path()):
+                               continue 
 
-                                if selected_data is None:
-                                    print "Missing configs for {} {}".format(suite.name(), task.get_abs_node_path())
-                                    continue
+                            available_data = filter(None, task.get_abs_node_path().split("/"))
+                            selected_data = self.select_service(available_data)
+                                    
+                            if selected_data is None:
+                                print "Missing configs for {} {}".format(suite.name(), task.get_abs_node_path())
+                                continue
 
-                                if self.is_meter(task):
-                                    for meter in task.meters:
-                                        min, max, threshold = meter.min(), meter.max(), meter.value()
-                                    available_data.append(','.join(map(lambda x: str(x), [min, max, threshold])))
-                                else:
-                                    available_data.append(str(task.get_state()))
+                            if self.is_meter(task):
+                                for meter in task.meters:
+                                    min, max, threshold = meter.min(), meter.max(), meter.value()
+                                available_data.append(','.join(map(lambda x: str(x), [min, max, threshold])))
+                            else:
+                                available_data.append(str(task.get_state()))
 
 
-                                try:
+                            try:
+                                metric = self.combine(selected_data, available_data)
+                                self.metrics.append(metric)
+                            except:
+                                if selected_data and available_data:
                                     metric = self.combine(selected_data, available_data)
                                     self.metrics.append(metric)
-                                except:
-                                    if selected_data and available_data:
-                                        metric = self.combine(selected_data, available_data)
-                                        self.metrics.append(metric)
-                                    else:
-                                        print "Unable to parse data:"
-                                        print task.get_abs_node_path()
-                                        raise
+                                else:
+                                    print "Unable to parse data:"
+                                    print task.get_abs_node_path()
+                                    raise
 
         return self.metrics
