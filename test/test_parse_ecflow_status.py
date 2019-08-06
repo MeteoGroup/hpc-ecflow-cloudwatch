@@ -17,6 +17,7 @@ class TestParseEcflowStats(unittest.TestCase):
         parser = EcflowStateParser(self.get_test_data())
         self.metrics = parser.parse()
         self.aggregator = MetricAgregator(self.metrics)
+        #print json.dumps(self.metrics, indent=4)
 
     def get_test_data(self):
         cwd = os.getcwd()
@@ -28,12 +29,12 @@ class TestParseEcflowStats(unittest.TestCase):
         self.assertTrue(len(counts)>0)
 
     def testEcflowParser(self):
-        print(json.dumps(self.metrics, indent=4))
+        #print(json.dumps(self.metrics, indent=4))
         self.assertTrue(len(self.metrics)>0)
 
     def testAggregatorCount(self):
         counts = self.aggregator.get_counts()
-        print json.dumps(counts, indent=4)
+        #print json.dumps(counts, indent=4)
         with open("{}/data/counts.json".format(os.getcwd())) as cjs:
             schema_data = cjs.read()
         schema = json.loads(schema_data)
@@ -41,8 +42,9 @@ class TestParseEcflowStats(unittest.TestCase):
 
     def testGetMeters(self):
         output = self.aggregator.get_metrics_meters()
-        self.assertTrue(len(output)>0)
         #print json.dumps(output, indent=4)
+        self.assertTrue(len(output)>0)
+        
 
     def testGetAbortedTaskList(self):
         output = self.aggregator.get_aborted_task_list()
