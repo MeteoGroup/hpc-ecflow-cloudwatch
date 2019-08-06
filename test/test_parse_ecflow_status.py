@@ -14,7 +14,7 @@ import ecflow
 class TestParseEcflowStats(unittest.TestCase):
 
     def setUp(self):
-        parser = EcflowStateParser(self.get_test_data(), fetch_new=True)
+        parser = EcflowStateParser(self.get_test_data(), fetch_new=False)
         self.metrics = parser.parse()
         self.aggregator = MetricAgregator(self.metrics)
         #print json.dumps(self.metrics, indent=4)
@@ -22,6 +22,7 @@ class TestParseEcflowStats(unittest.TestCase):
     def get_test_data(self):
         cwd = os.getcwd()
         ecflow_states_test_data_sets = "{}/data/ecflow_sample_state".format(cwd)
+        #ecflow_states_test_data_sets = "{}/data/ecflow_state_staging".format(cwd)
         return ecflow.Defs(ecflow_states_test_data_sets)
 
     def testPrepareCloudwatchMetrics(self):
