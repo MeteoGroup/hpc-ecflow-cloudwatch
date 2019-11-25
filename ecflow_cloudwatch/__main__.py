@@ -30,8 +30,9 @@ def main():
     counts = aggregator.get_metrics_counts()
     meters = aggregator.get_metrics_meters()
     aborted_task_list = aggregator.get_aborted_task_list()
+    running_threads = aggregator.get_running_threads()
 
-    for ecflow_data in counts + meters + aborted_task_list:
+    for ecflow_data in counts + meters + aborted_task_list + running_threads:
         put_metric_data([ecflow_data], namespace)
     
 
