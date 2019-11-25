@@ -25,14 +25,11 @@ def main():
     ecf_port = args.ecflow_port
     fetch_new = bool(strtobool(args.fetch_new))
 
-    
-    
     metrics = get_ecflow_metrics(fetch_new)
     aggregator = MetricAgregator(metrics)
     counts = aggregator.get_metrics_counts()
     meters = aggregator.get_metrics_meters()
     aborted_task_list = aggregator.get_aborted_task_list()
-
 
     for ecflow_data in counts + meters + aborted_task_list:
         put_metric_data([ecflow_data], namespace)
