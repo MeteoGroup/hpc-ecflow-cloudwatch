@@ -1,6 +1,5 @@
 import argparse
 import boto3
-from subprocess import Popen, PIPE
 import json
 
 def parse_args():
@@ -16,16 +15,6 @@ def parse_args():
                            default='False', choices=('True','False'))
     args = parser.parse_args()
     return args
-
-
-
-def get_cmd_output(cmd):
-    """Execute the command and return its output"""
-    process = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
-    stdout, stderr = process.communicate()
-    if stderr != "":
-        raise ValueError("Unable to run {0}, Error: {1}".format(cmd,stderr))
-    return stdout
 
 
 def put_metric_data(data,namespace=None):

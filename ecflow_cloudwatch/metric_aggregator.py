@@ -1,3 +1,5 @@
+import subprocess
+
 class MetricAgregator(object):
 
     def __init__(self, metrics):
@@ -72,6 +74,13 @@ class MetricAgregator(object):
     def get_metrics_counts(self):
         counts = self.get_counts()
         return [self.prepare_cloudwatch_metrics({k:v}) for k,v in counts.iteritems()]
+
+    def get_running_threads(self):
+        procs = subprocess.check_output(['ps', 'auwx']).splitlines()
+        data = dict(
+            running_threads = len([proc for proc in procs if 'ecflow_server' in proc])
+        )
+        return [self.prepare_cloudwatch_metrics(data)]
     
     def get_metrics_meters(self):
         cloud_watch_metrics = []
@@ -107,7 +116,6 @@ class MetricAgregator(object):
                             unit="Count",
                             dimensions=dimensions))
         return cloud_watch_metrics
-
 
 
 
