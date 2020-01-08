@@ -40,6 +40,8 @@ class MetricAgregator(object):
         return self.agregated_metrics
 
     def percentage(self, part, whole):
+        if part == 0 and whole == 0:
+            return 0
         return 100 * float(part)/float(whole)
 
     def prepared_dimensions(self, dimensions):
