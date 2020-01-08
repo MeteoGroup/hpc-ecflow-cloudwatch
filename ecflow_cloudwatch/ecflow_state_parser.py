@@ -117,10 +117,6 @@ class EcflowStateParser(object):
                 for service in suite.nodes:
                     for task in service.get_all_nodes():
                         if self.is_task(task) or self.is_meter(task):
-                            # if not recent date then continue
-                            if self.fetch_new and not self.filter_date(task.get_abs_node_path()):
-                               continue 
-
                             available_data = filter(None, task.get_abs_node_path().split("/"))
                             selected_data = self.select_service(available_data)
                                     
@@ -128,13 +124,14 @@ class EcflowStateParser(object):
                                 print "Missing configs for {} {}".format(suite.name(), task.get_abs_node_path())
                                 continue
 
-                            if self.is_meter(task):
-                                for meter in task.meters:
-                                    min, max, threshold = meter.min(), meter.max(), meter.value()
-                                available_data.append(','.join(map(lambda x: str(x), [min, max, threshold])))
-                            else:
-                                available_data.append(str(task.get_state()))
-
+                            # Use fetch recent only for meter data 
+                            if self.fetch_new and  self.filter_date(task.get_abs_node_path()):
+                                if self.is_meter(task):
+                                    for meter in task.meters:
+                                        min, max, threshold = meter.min(), meter.max(), meter.value()
+                                    available_data.append(','.join(map(lambda x: str(x), [min, max, threshold])))
+                                else:
+                                    available_data.append(str(task.get_state()))
 
                             try:
                                 metric = self.combine(selected_data, available_data)
