@@ -126,12 +126,12 @@ class EcflowStateParser(object):
                                 print "Missing configs for {} {}".format(suite.name(), task.get_abs_node_path())
                                 continue
 
-                            # Use fetch recent only for meter data 
-                            if self.fetch_new and  self.filter_date(task.get_abs_node_path()):
-                                if self.is_meter(task):
+                            if self.is_meter(task):
+                                # Use fetch recent only for meter data 
+                                if self.fetch_new and  self.filter_date(task.get_abs_node_path()):
                                     for meter in task.meters:
                                         min, max, threshold = meter.min(), meter.max(), meter.value()
-                                    available_data.append(','.join(map(lambda x: str(x), [min, max, threshold])))
+                                        available_data.append(','.join(map(lambda x: str(x), [min, max, threshold])))
                                 else:
                                     available_data.append(str(task.get_state()))
 
