@@ -115,6 +115,11 @@ class EcflowStateParser(object):
         return dict(output)
     
     def parse(self):
+        def parse_meter_data():
+            for meter in task.meters:
+                min, max, threshold = meter.min(), meter.max(), meter.value()
+                return ','.join(map(lambda x: str(x), [min, max, threshold]))
+
         for suite in self.__defs.suites:
                 for service in suite.nodes:
                     for task in service.get_all_nodes():
@@ -129,14 +134,7 @@ class EcflowStateParser(object):
                             if self.is_meter(task):
                                 # Use fetch recent only for meter data 
                                 if self.fetch_new and  self.filter_date(task.get_abs_node_path()):
-                                    for meter in task.meters:
-                                        min, max, threshold = meter.min(), meter.max(), meter.value()
-                                        available_data.append(','.join(map(lambda x: str(x), [min, max, threshold])))
-                                else:
-                                    for meter in task.meters:
-                                        min, max, threshold = meter.min(), meter.max(), meter.value()
-                                        available_data.append(','.join(map(lambda x: str(x), [min, max, threshold])))
-
+                                    available_data.append(parse_meter_data())
                             else:
                                 available_data.append(str(task.get_state()))
 
