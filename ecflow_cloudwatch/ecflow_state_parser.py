@@ -106,7 +106,9 @@ class EcflowStateParser(object):
                 continue
             # Rule 3# Remaning data join with underscore and convert cycledate to forecast hour
             if data_format_copy[i] == data_format_copy[-1]:
-                 data_set_copy[i] = "_".join(self.convert_to_forecast_hour(d) if self.convert_to_forecast_hour(d) else d for d in data_set_copy[i:])
+                 prepared_list = [self.convert_to_forecast_hour(d) if self.convert_to_forecast_hour(d) else d for d in data_set_copy[i:]]
+                 if prepared_list:
+                     data_set_copy[i] = "_".join(prepared_list)
             output.append((data_format_copy[i],data_set_copy[i]))
         output.append((state_key, state))
         #output.append(('task_path', '/'.join(data_set_copy)))
