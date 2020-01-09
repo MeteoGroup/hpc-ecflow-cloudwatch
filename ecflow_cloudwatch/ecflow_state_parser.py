@@ -25,7 +25,7 @@ class EcflowStateParser(object):
         }
     }
 
-    cycletime_format = "(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})"
+    cycletime_format = r'(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})'
     cycletime_date_format = "%Y%m%d%H%M"
 
     metrics = []
