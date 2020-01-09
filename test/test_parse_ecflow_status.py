@@ -44,7 +44,7 @@ class TestParseEcflowStats(unittest.TestCase):
     def testGetMeters(self):
         output = self.aggregator.get_metrics_meters()
         #print json.dumps(output, indent=4)
-        self.assertTrue(len(output)>0)
+        self.assertTrue(type(output) == list)
         
 
     def testGetAbortedTaskList(self):
