@@ -87,7 +87,7 @@ class MetricAgregator(object):
     def get_metrics_meters(self):
         cloud_watch_metrics = []
         for svc in self.metrics:
-            if "progress" in svc:
+            if "progress" in svc and "-1" in svc["progress"]:
                 _, maximum, value = map(int, svc['progress'].split(","))
                 # change -1 to 0, cloudwatch does not support negative int
                 if value < 0:
