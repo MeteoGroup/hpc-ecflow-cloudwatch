@@ -133,7 +133,12 @@ class EcflowStateParser(object):
                                         min, max, threshold = meter.min(), meter.max(), meter.value()
                                         available_data.append(','.join(map(lambda x: str(x), [min, max, threshold])))
                                 else:
-                                    available_data.append(str(task.get_state()))
+                                    for meter in task.meters:
+                                        min, max, threshold = meter.min(), meter.max(), meter.value()
+                                        available_data.append(','.join(map(lambda x: str(x), [min, max, threshold])))
+
+                            else:
+                                available_data.append(str(task.get_state()))
 
                             try:
                                 metric = self.combine(selected_data, available_data)
