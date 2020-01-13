@@ -25,7 +25,7 @@ class EcflowStateParser(object):
         }
     }
 
-    cycletime_format = "(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})"
+    cycletime_format = r'(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})'
     cycletime_date_format = "%Y%m%d%H%M"
 
     metrics = []
@@ -106,21 +106,24 @@ class EcflowStateParser(object):
                 continue
             # Rule 3# Remaning data join with underscore and convert cycledate to forecast hour
             if data_format_copy[i] == data_format_copy[-1]:
-                 data_set_copy[i] = "_".join(self.convert_to_forecast_hour(d) if self.convert_to_forecast_hour(d) else d for d in data_set_copy[i:])
+                 prepared_list = [self.convert_to_forecast_hour(d) if self.convert_to_forecast_hour(d) else d for d in data_set_copy[i:]]
+                 if prepared_list:
+                     data_set_copy[i] = "_".join(prepared_list)
             output.append((data_format_copy[i],data_set_copy[i]))
         output.append((state_key, state))
         #output.append(('task_path', '/'.join(data_set_copy)))
         return dict(output)
     
     def parse(self):
+        def parse_meter_data():
+            for meter in task.meters:
+                min, max, threshold = meter.min(), meter.max(), meter.value()
+                return ','.join(map(lambda x: str(x), [min, max, threshold]))
+
         for suite in self.__defs.suites:
                 for service in suite.nodes:
                     for task in service.get_all_nodes():
                         if self.is_task(task) or self.is_meter(task):
-                            # if not recent date then continue
-                            if self.fetch_new and not self.filter_date(task.get_abs_node_path()):
-                               continue 
-
                             available_data = filter(None, task.get_abs_node_path().split("/"))
                             selected_data = self.select_service(available_data)
                                     
@@ -129,12 +132,11 @@ class EcflowStateParser(object):
                                 continue
 
                             if self.is_meter(task):
-                                for meter in task.meters:
-                                    min, max, threshold = meter.min(), meter.max(), meter.value()
-                                available_data.append(','.join(map(lambda x: str(x), [min, max, threshold])))
+                                # Use fetch recent only for meter data 
+                                if self.fetch_new and  self.filter_date(task.get_abs_node_path()):
+                                    available_data.append(parse_meter_data())
                             else:
                                 available_data.append(str(task.get_state()))
-
 
                             try:
                                 metric = self.combine(selected_data, available_data)
