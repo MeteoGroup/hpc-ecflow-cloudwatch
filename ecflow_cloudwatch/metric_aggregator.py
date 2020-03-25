@@ -14,7 +14,7 @@ class MetricAgregator(object):
     def get_counts(self, dimentions=[]):
         for svc in self.metrics:
             for key, value in svc.items():
-                
+
                 if "status" in key:
                     if value == "aborted":
                         self.aborted_tasks +=  1
@@ -29,7 +29,7 @@ class MetricAgregator(object):
                         self.running_tasks +=  1
 
                     if value == "complete":
-                        self.completed_tasks +=  1 
+                        self.completed_tasks +=  1
 
             self.agregated_metrics['aborted_tasks'] = self.aborted_tasks
             self.agregated_metrics['suspended_tasks'] = self.suspended_tasks
@@ -46,7 +46,7 @@ class MetricAgregator(object):
 
     def prepared_dimensions(self, dimensions):
         """
-        Convert dict to cloudwatch formate dimension data 
+        Convert dict to cloudwatch formate dimension data
         """
         dimensions_data = []
         for key, value in dimensions.iteritems():
@@ -83,7 +83,7 @@ class MetricAgregator(object):
             running_threads = len([proc for proc in procs if 'ecflow_server' in proc])
         )
         return [self.prepare_cloudwatch_metrics(data)]
-    
+
     def get_metrics_meters(self):
         cloud_watch_metrics = []
         for svc in self.metrics:
@@ -94,7 +94,7 @@ class MetricAgregator(object):
                     value = 0
                 metrics_data = {svc['datasource']: self.percentage(value, maximum)}
                 # with different progress value cloudwatch create new metrics instead of updating exsting
-                # to fix this remove progress from metrics 
+                # to fix this remove progress from metrics
                 del svc['progress']
                 # remove datasource key because, already sending as metrics name
                 del svc['datasource']
@@ -111,12 +111,20 @@ class MetricAgregator(object):
             for key, value in svc.items():
                 if "status" in key:
                     if value == "aborted":
-                        metrics_data  = {svc['task']:1}
-                        dimensions = self.prepared_dimensions(svc)
-                        cloud_watch_metrics.append(self.prepare_cloudwatch_metrics(
-                            data=metrics_data,
-                            unit="Count",
-                            dimensions=dimensions))
+                        try:
+                            if 'datasource_task' in  svc.keys():
+                                metrics_data = {svc['datasource_task']:1}
+                            else:
+                                metrics_data  = {svc['task']:1}
+                            dimensions = self.prepared_dimensions(svc)
+                            cloud_watch_metrics.append(self.prepare_cloudwatch_metrics(
+                                data=metrics_data,
+                                unit="Count",
+                                dimensions=dimensions))
+                        except Exception as e:
+                            print(str(svc))
+                            print(str(e))
+                            pass
         return cloud_watch_metrics
 
 
@@ -125,5 +133,5 @@ class MetricAgregator(object):
 
 
 
-                    
+
 
