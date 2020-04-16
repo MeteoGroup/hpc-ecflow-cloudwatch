@@ -1,6 +1,6 @@
 import os
 from distutils.util import strtobool
-import ecflow 
+import ecflow
 from common import parse_args
 from common import put_metric_data
 
@@ -9,10 +9,9 @@ from ecflow_state_parser import EcflowStateParser
 from metric_aggregator import MetricAgregator
 
 def get_ecflow_metrics(fetch_new):
-    # Get data 
+    # Get data
     ecf_client = GetEcflowStats()
     ecf_defs = ecf_client.fetch_ecflow_stats()
-
     # parse to json
     parser = EcflowStateParser(ecf_defs, fetch_new=fetch_new)
     return parser.parse()
@@ -37,11 +36,11 @@ def main():
 
     for ecflow_data in counts + meters + aborted_task_list + running_threads:
         put_metric_data([ecflow_data], namespace)
-    
+
 
 if __name__ == '__main__':
     main()
 
-    
+
 
 
