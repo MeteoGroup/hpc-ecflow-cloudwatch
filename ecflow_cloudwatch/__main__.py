@@ -21,6 +21,7 @@ def get_ecflow_metrics(fetch_new):
 def main():
     args = parse_args()
     namespace = args.namespace
+    environment = args.environment
     ecf_host = args.ecflow_host
     ecf_port = args.ecflow_port
     fetch_new = bool(strtobool(args.fetch_new))
