@@ -5,8 +5,8 @@ import json
 def parse_args():
     """parse command line argument"""
     parser = argparse.ArgumentParser(description='Put ecFlow metrics to cloudwatch')
-    parser.add_argument('--namespace', help='The namespace for the metric data. (default: Dev/ecFlow)', \
-                           default="Dev/ecFlow")
+    parser.add_argument('--namespace', help='The namespace for the metric data. (default: ecflow)', \
+                           default="ecflow")
     parser.add_argument('--environment', help='Specify environment, it will get add in dimensions with Env key')
     parser.add_argument('--ecflow_port', help='ecflow server port', \
                            default="3143")
