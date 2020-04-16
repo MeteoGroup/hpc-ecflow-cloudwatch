@@ -26,8 +26,10 @@ def main():
     ecf_port = args.ecflow_port
     fetch_new = bool(strtobool(args.fetch_new))
 
+    dimensions = dict(Env=environment)
+
     metrics = get_ecflow_metrics(fetch_new)
-    aggregator = MetricAgregator(metrics)
+    aggregator = MetricAgregator(metrics, dimensions)
     counts = aggregator.get_metrics_counts()
     meters = aggregator.get_metrics_meters()
     aborted_task_list = aggregator.get_aborted_task_list()

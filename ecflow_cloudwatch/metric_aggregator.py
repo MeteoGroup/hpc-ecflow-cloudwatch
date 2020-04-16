@@ -2,7 +2,7 @@ import subprocess
 
 class MetricAgregator(object):
 
-    def __init__(self, metrics):
+    def __init__(self, metrics, default_dimensions):
         self.metrics = metrics
         self.agregated_metrics = {}
         self.aborted_tasks = 0
@@ -10,6 +10,7 @@ class MetricAgregator(object):
         self.queued_tasks = 0
         self.running_tasks = 0
         self.completed_tasks = 0
+        self.default_dimensions = self.prepared_dimensions(default_dimensions)
 
     def get_counts(self, dimentions=[]):
         for svc in self.metrics:
@@ -61,6 +62,8 @@ class MetricAgregator(object):
         Prepare cloudwatch json using dict input,
         namespace and dimensions
         """
+        if self.default_dimensions[0] not in dimensions:
+            dimensions.append(self.default_dimensions[0])
         metrics_data = dict(
                 MetricName=data.keys()[0],
                 Value=data.values()[0],
