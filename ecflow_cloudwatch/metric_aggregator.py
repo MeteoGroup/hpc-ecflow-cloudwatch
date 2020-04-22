@@ -62,8 +62,9 @@ class MetricAgregator(object):
         Prepare cloudwatch json using dict input,
         namespace and dimensions
         """
-        if self.default_dimensions[0] not in dimensions:
-            dimensions.append(self.default_dimensions[0])
+        for default_dimension in self.default_dimensions:
+            if default_dimension not in dimensions:
+                dimensions.append(self.default_dimensions[0])
         metrics_data = dict(
                 MetricName=data.keys()[0],
                 Value=data.values()[0],
