@@ -64,7 +64,7 @@ class MetricAgregator(object):
         """
         for default_dimension in self.default_dimensions:
             if default_dimension not in dimensions:
-                dimensions.append(self.default_dimensions[0])
+                dimensions.append(default_dimension)
         metrics_data = dict(
                 MetricName=data.keys()[0],
                 Value=data.values()[0],
