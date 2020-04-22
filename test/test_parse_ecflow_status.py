@@ -54,15 +54,7 @@ class TestParseEcflowStats(unittest.TestCase):
 
     def testDimension(self):
         output = self.aggregator.get_aborted_task_list()
-        for key, value in self.default_dimensions.iteritems():
-            dimensions_data = (dict(
-                Name=key,
-                Value=value
-            ))
-        for data in output:
-            self.assertTrue(dimensions_data in data['Dimensions'])
-
-
-
-
-
+        dimensions = [dict(Name=key,Value=value) for key, value in self.default_dimensions.iteritems()]
+        for dimension in dimensions:
+            for data in output:
+                self.assertTrue(dimension in data['Dimensions'])
