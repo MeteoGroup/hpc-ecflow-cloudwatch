@@ -15,8 +15,9 @@ class TestParseEcflowStats(unittest.TestCase):
 
     def setUp(self):
         parser = EcflowStateParser(self.get_test_data(), fetch_new=False)
+        self.default_dimensions = dict(Env="test")
         self.metrics = parser.parse()
-        self.aggregator = MetricAgregator(self.metrics)
+        self.aggregator = MetricAgregator(metrics=self.metrics, default_dimensions=self.default_dimensions)
         #print json.dumps(self.metrics, indent=4)
 
     def get_test_data(self):
@@ -45,13 +46,15 @@ class TestParseEcflowStats(unittest.TestCase):
         output = self.aggregator.get_metrics_meters()
         #print json.dumps(output, indent=4)
         self.assertTrue(type(output) == list)
-        
+
 
     def testGetAbortedTaskList(self):
         output = self.aggregator.get_aborted_task_list()
         #print json.dumps(output, indent=4)
 
-
-
-
-
+    def testDimension(self):
+        output = self.aggregator.get_aborted_task_list()
+        dimensions = [dict(Name=key,Value=value) for key, value in self.default_dimensions.iteritems()]
+        for dimension in dimensions:
+            for data in output:
+                self.assertTrue(dimension in data['Dimensions'])
